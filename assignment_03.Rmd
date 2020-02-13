@@ -21,7 +21,7 @@ library(haven)
 import <- read_stata("us_import.dta")
 ```
 
-```{r summarize data, message = FALSE}
+```{r summarize data}
 import %>%
   group_by(year) %>%
   summarize(tot_imp = mean(tot_imp)) 
