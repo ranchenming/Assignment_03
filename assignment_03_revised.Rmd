@@ -34,13 +34,13 @@ trade_2 <- trade_1 %>%
 head(trade_2,10)
 ```
 
-```{r bar graph}
+```{r bar graph1}
 ggplot(data=trade_1, aes(x=year, y=trade_value)) +
   geom_bar(stat="identity", fill="steelblue")+
   theme_minimal()
 ```
 
-```{r bar graph}
+```{r line graph}
 ggplot(data = trade_2, aes(year)) + 
   geom_line(aes(y = Export, colour = "blue")) + 
   geom_line(aes(y = Import, colour = "read"))
