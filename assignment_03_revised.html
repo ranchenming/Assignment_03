@@ -379,21 +379,41 @@ summary {
 ## x dplyr::filter() masks stats::filter()
 ## x dplyr::lag()    masks stats::lag()</code></pre>
 <pre class="r"><code>library(haven)</code></pre>
-<pre><code>## # A tibble: 54 x 3
-## # Groups:   year [27]
-##     year trade_type       tot_imp
-##    &lt;dbl&gt; &lt;chr&gt;              &lt;dbl&gt;
-##  1  1992 Total Exports 400261591.
-##  2  1992 Total Imports 469328837.
-##  3  1993 Total Exports 391539544.
-##  4  1993 Total Imports 500932919.
-##  5  1994 Total Exports 438927232.
-##  6  1994 Total Imports 561950299.
-##  7  1995 Total Exports 486854600.
-##  8  1995 Total Imports 626344844.
-##  9  1996 Total Exports 510158700.
-## 10  1996 Total Imports 661471783.
-## # … with 44 more rows</code></pre>
+<pre class="r"><code>trade &lt;- read_stata(&quot;us_trade_data.dta&quot;)
+head(trade,10)</code></pre>
+<pre><code>## # A tibble: 10 x 5
+##    region      trade_type    district       year trade_value
+##    &lt;chr&gt;       &lt;chr&gt;         &lt;chr&gt;         &lt;dbl&gt;       &lt;dbl&gt;
+##  1 Afghanistan Total Exports Anchorage, AK  1996      676079
+##  2 Afghanistan Total Exports Anchorage, AK  1997     2566575
+##  3 Afghanistan Total Exports Anchorage, AK  1998      439805
+##  4 Afghanistan Total Exports Anchorage, AK  1999     4003374
+##  5 Afghanistan Total Exports Anchorage, AK  2003      117551
+##  6 Afghanistan Total Exports Anchorage, AK  2004        2797
+##  7 Afghanistan Total Exports Anchorage, AK  2005      295549
+##  8 Afghanistan Total Exports Anchorage, AK  2006       84074
+##  9 Afghanistan Total Exports Anchorage, AK  2007       40684
+## 10 Afghanistan Total Exports Anchorage, AK  2008        2950</code></pre>
+<pre class="r"><code>trade_1 &lt;- trade %&gt;%
+  filter(is.na(trade_value) == FALSE) %&gt;% 
+  group_by(year, trade_type) %&gt;%
+  summarize(trade_value = mean(trade_value)) %&gt;%
+  pivot_wider(id_cols = year, names_from = trade_type, values_from = trade_value)
+head(trade_1,10)</code></pre>
+<pre><code>## # A tibble: 10 x 3
+## # Groups:   year [10]
+##     year `Total Exports` `Total Imports`
+##    &lt;dbl&gt;           &lt;dbl&gt;           &lt;dbl&gt;
+##  1  1992      400261591.      469328837.
+##  2  1993      391539544.      500932919.
+##  3  1994      438927232.      561950299.
+##  4  1995      486854600.      626344844.
+##  5  1996      510158700.      661471783.
+##  6  1997      557099031.      717752978.
+##  7  1998      541709770.      739734118.
+##  8  1999      567640060.      836610143.
+##  9  2000      633016961.      963927696.
+## 10  2001      574805504.      906247786.</code></pre>
 
 
 

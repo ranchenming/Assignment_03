@@ -13,17 +13,17 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(haven)
 ```
-
-```{r import data, echo=FALSE, message=TRUE, warning=TRUE}
+```{r import data}
 trade <- read_stata("us_trade_data.dta")
+head(trade,10)
 ```
-
-```{r summarize data, echo=FALSE, message=TRUE, warning=TRUE, paged.print=TRUE}
+```{r create tible}
 trade_1 <- trade %>%
   filter(is.na(trade_value) == FALSE) %>% 
   group_by(year, trade_type) %>%
   summarize(trade_value = mean(trade_value)) %>%
   pivot_wider(id_cols = year, names_from = trade_type, values_from = trade_value)
+head(trade_1,10)
 ```
 
 
