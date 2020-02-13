@@ -21,9 +21,24 @@ head(trade,10)
 trade_1 <- trade %>%
   filter(is.na(trade_value) == FALSE) %>% 
   group_by(year, trade_type) %>%
-  summarize(trade_value = mean(trade_value)) %>%
-  pivot_wider(id_cols = year, names_from = trade_type, values_from = trade_value)
+  summarize(trade_value = mean(trade_value))
+
+trade_1$trade_type[trade_1$trade_type == "Total Exports"] <- "Export" 
+trade_1$trade_type[trade_1$trade_type == "Total Imports"] <- "Import" 
+
 head(trade_1,10)
 ```
+```{r reshape data}
+trade_2 <- trade_1 %>%
+    pivot_wider(id_cols = year, names_from = trade_type, values_from = trade_value)
+head(trade_2,10)
+```
+
+```{r bar graph}
+ggplot(data=trade_2, aes(x=year, y=Export)) +
+  geom_bar(stat="identity", fill="steelblue")+
+  theme_minimal()
+```
+
 
 
