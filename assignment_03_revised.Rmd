@@ -19,9 +19,11 @@ trade <- read_stata("us_trade_data.dta")
 ```
 
 ```{r summarize data, echo=FALSE, message=TRUE, warning=TRUE, paged.print=TRUE}
-trade %>%
-  group_by(year,trade_type) %>%
-  summarize(tot_imp = mean(trade_value)) 
+trade_1 <- trade %>%
+  filter(is.na(trade_value) == FALSE) %>% 
+  group_by(year, trade_type) %>%
+  summarize(trade_value = mean(trade_value)) %>%
+  pivot_wider(id_cols = year, names_from = trade_type, values_from = trade_value)
 ```
 
 
