@@ -1,0 +1,27 @@
+---
+title: "assignment 03"
+author: "Chenming Ran"
+date: "2/13/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r load-packages, message=TRUE, warning=TRUE, paged.print=TRUE}
+library(tidyverse)
+library(haven)
+```
+
+```{r import data, echo=FALSE, message=TRUE, warning=TRUE}
+trade <- read_stata("us_trade_data.dta")
+```
+
+```{r summarize data, echo=FALSE, message=TRUE, warning=TRUE, paged.print=TRUE}
+trade %>%
+  group_by(year,trade_type) %>%
+  summarize(tot_imp = mean(trade_value)) 
+```
+
+
