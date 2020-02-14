@@ -44,7 +44,7 @@ ggplot(data=trade_1, aes(x=year, y=Net_Import)) +
 ```
 
 
-```{r create tible3}
+```{r create tible2}
 trade_2 <- trade %>%
   filter(is.na(trade_value) == FALSE, year == 2018) %>% 
   group_by(year, trade_type, state) %>%
@@ -70,9 +70,16 @@ plot_usmap(regions = "state", data = trade_2, values = "Import", color = "red") 
   theme(legend.position = "right")
 ```
 
+```{r create tible3}
+trade_3 <- trade %>%
+  filter(is.na(trade_value) == FALSE) %>% 
+  group_by(year, trade_type, country) %>%
+  summarize(trade_value = mean(trade_value)) %>%
+  pivot_wider(names_from = trade_type, values_from = trade_value) 
 
-
-
+trade_3$Net_Import = trade_3$Import-trade_3$Export
+head(trade_3,10)
+```
 
 
 
