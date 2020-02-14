@@ -15,6 +15,8 @@ library(haven)
 ```
 ```{r import data}
 trade <- read_stata("us_trade_data.dta")
+trade$trade_type[trade$trade_type == "Total Exports"] <- "Export" 
+trade$trade_type[trade$trade_type == "Total Imports"] <- "Import" 
 head(trade,10)
 ```
 ```{r create tible}
@@ -22,9 +24,6 @@ trade_1 <- trade %>%
   filter(is.na(trade_value) == FALSE) %>% 
   group_by(year, trade_type) %>%
   summarize(trade_value = mean(trade_value))
-
-trade_1$trade_type[trade_1$trade_type == "Total Exports"] <- "Export" 
-trade_1$trade_type[trade_1$trade_type == "Total Imports"] <- "Import" 
 
 head(trade_1,10)
 ```
@@ -48,3 +47,23 @@ ggplot(data=trade_2, aes(x=year, y=Net_Import)) +
   geom_bar(stat="identity", fill="steelblue")+
   theme_minimal()
 ```
+```{r create tible3}
+trade_3 <- trade %>%
+  filter(is.na(trade_value) == FALSE, year == 2018) %>% 
+  group_by(year, trade_type, district) %>%
+  summarize(trade_value = mean(trade_value)) %>%
+  pivot_wider(names_from = trade_type, values_from = trade_value) 
+
+head(trade_3,10)
+```
+
+
+
+
+
+
+
+
+
+
+
