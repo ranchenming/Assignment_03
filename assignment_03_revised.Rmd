@@ -13,6 +13,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(haven)
 ```
+
 ```{r import data}
 trade <- read_stata("us_trade_data.dta")
 trade$trade_type[trade$trade_type == "Total Exports"] <- "Export" 
@@ -23,40 +24,51 @@ head(trade,10)
 trade_1 <- trade %>%
   filter(is.na(trade_value) == FALSE) %>% 
   group_by(year, trade_type) %>%
-  summarize(trade_value = mean(trade_value))
+  summarize(trade_value = mean(trade_value)) %>%
+  pivot_wider(id_cols = year, names_from = trade_type, values_from = trade_value) 
 
+trade_1$Net_Import = trade_1$Import-trade_1$Export
 head(trade_1,10)
-```
-```{r reshape data}
-trade_2 <- trade_1 %>%
-    pivot_wider(id_cols = year, names_from = trade_type, values_from = trade_value) 
-
-trade_2$Net_Import = trade_2$Import-trade_2$Export
-
-head(trade_2,10)
 ```
 
 ```{r line graph}
-ggplot(data = trade_2, aes(year)) + 
+ggplot(data = trade_1, aes(year)) + 
   geom_line(aes(y = Export, colour = "blue")) + 
   geom_line(aes(y = Import, colour = "read"))
 ```
 
 ```{r bar graph}
-ggplot(data=trade_2, aes(x=year, y=Net_Import)) +
+ggplot(data=trade_1, aes(x=year, y=Net_Import)) +
   geom_bar(stat="identity", fill="steelblue")+
   theme_minimal()
 ```
+
+
 ```{r create tible3}
-trade_3 <- trade %>%
+trade_2 <- trade %>%
   filter(is.na(trade_value) == FALSE, year == 2018) %>% 
-  group_by(year, trade_type, district) %>%
+  group_by(year, trade_type, state) %>%
   summarize(trade_value = mean(trade_value)) %>%
   pivot_wider(names_from = trade_type, values_from = trade_value) 
 
-head(trade_3,10)
+trade_2$Net_Import = trade_2$Import-trade_2$Export
+head(trade_2,10)
+```
+```{r install}
+install.packages("usmap",repos = "http://cran.us.r-project.org")
+library(usmap)
+library(ggplot2)
 ```
 
+
+```{r create map}
+plot_usmap(regions = "state", data = trade_2, values = "Export", color = "red") + 
+  scale_fill_continuous(name = "U.S Exports(2019)", label = scales::comma) + 
+  theme(legend.position = "right")
+plot_usmap(regions = "state", data = trade_2, values = "Import", color = "red") + 
+  scale_fill_continuous(name = "U.S Exports(2019)", label = scales::comma) + 
+  theme(legend.position = "right")
+```
 
 
 
