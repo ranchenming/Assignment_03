@@ -23,6 +23,7 @@ head(trade,10)
 ```{r create tible}
 trade_1 <- trade %>%
   filter(is.na(trade_value) == FALSE) %>% 
+  filter(country %in% c("Africa", "Asia", "Australia and Oceania", "Europe", "North America", "South/Central America" ))%>%
   group_by(year, trade_type) %>%
   summarize(trade_value = mean(trade_value)) %>%
   pivot_wider(id_cols = year, names_from = trade_type, values_from = trade_value) 
@@ -31,22 +32,10 @@ trade_1$Net_Import = trade_1$Import-trade_1$Export
 head(trade_1,10)
 ```
 
-```{r line graph}
-ggplot(data = trade_1, aes(year)) + 
-  geom_line(aes(y = Export, colour = "blue")) + 
-  geom_line(aes(y = Import, colour = "read"))
-```
-
-```{r bar graph}
-ggplot(data=trade_1, aes(x=year, y=Net_Import)) +
-  geom_bar(stat="identity", fill="steelblue")+
-  theme_minimal()
-```
-
-
 ```{r create tible2}
 trade_2 <- trade %>%
   filter(is.na(trade_value) == FALSE, year == 2018) %>% 
+  filter(country %in% c("Africa", "Asia", "Australia and Oceania", "Europe", "North America", "South/Central America" ))%>%
   group_by(year, trade_type, state) %>%
   summarize(trade_value = mean(trade_value)) %>%
   pivot_wider(names_from = trade_type, values_from = trade_value) 
@@ -54,12 +43,30 @@ trade_2 <- trade %>%
 trade_2$Net_Import = trade_2$Import-trade_2$Export
 head(trade_2,10)
 ```
+```{r create tible3}
+trade_3 <- trade %>%
+  filter(is.na(trade_value) == FALSE) %>% 
+  filter(country %in% c("Africa", "Asia", "Australia and Oceania", "Europe", "North America", "South/Central America" ))%>%
+  group_by(year, trade_type, country) %>%
+  summarize(trade_value = mean(trade_value)) %>%
+  pivot_wider(names_from = trade_type, values_from = trade_value) 
+
+trade_3$Net_Import = trade_3$Import-trade_3$Export
+head(trade_3,10)
+```
+
+
 ```{r install}
 install.packages("usmap",repos = "http://cran.us.r-project.org")
 library(usmap)
 library(ggplot2)
 ```
 
+```{r line graph}
+ggplot(data = trade_1, aes(year)) + 
+  geom_line(aes(y = Export, colour = "blue")) + 
+  geom_line(aes(y = Import, colour = "read"))
+```
 
 ```{r create map}
 plot_usmap(regions = "state", data = trade_2, values = "Export", color = "red") + 
@@ -70,19 +77,12 @@ plot_usmap(regions = "state", data = trade_2, values = "Import", color = "red") 
   theme(legend.position = "right")
 ```
 
-```{r create tible3}
-trade_3 <- trade %>%
-  filter(is.na(trade_value) == FALSE) %>% 
-  group_by(year, trade_type, country) %>%
-  summarize(trade_value = mean(trade_value)) %>%
-  pivot_wider(names_from = trade_type, values_from = trade_value) 
-
-trade_3$Net_Import = trade_3$Import-trade_3$Export
-head(trade_3,10)
+```{r create area graph}
+ggplot(data=trade_3, aes(x=year, y=Export, fill=country)) + 
+    geom_area()
+ggplot(data=trade_3, aes(x=year, y=Import, fill=country)) + 
+    geom_area()
 ```
-
-
-
 
 
 
