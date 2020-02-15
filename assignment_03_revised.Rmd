@@ -6,21 +6,35 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(
+	echo = TRUE,
+	message = FALSE,
+	warning = FALSE
+)
 ```
 
-```{r load-packages, message=TRUE, warning=TRUE, paged.print=TRUE}
+```{r install-packages, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
+install.packages("usmap",repos = "http://cran.us.r-project.org")
+install.packages("scales", repos = "http://cran.us.r-project.org")
+```
+
+```{r load packaages, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
+library(usmap)
+library(ggplot2)
 library(tidyverse)
 library(haven)
+library(scales)
 ```
 
-```{r import data}
+```{r import data, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
 trade <- read_stata("us_trade_data.dta")
 trade$trade_type[trade$trade_type == "Total Exports"] <- "Export" 
-trade$trade_type[trade$trade_type == "Total Imports"] <- "Import" 
+trade$trade_type[trade$trade_type == "Total Imports"] <- "Import"
+trade$year = as.character(trade$year)
 head(trade,10)
 ```
-```{r create tible}
+
+```{r create tible1, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
 trade_1 <- trade %>%
   filter(is.na(trade_value) == FALSE) %>% 
   filter(country %in% c("Africa", "Asia", "Australia and Oceania", "Europe", "North America", "South/Central America" ))%>%
@@ -32,57 +46,87 @@ trade_1$Net_Import = trade_1$Import-trade_1$Export
 head(trade_1,10)
 ```
 
-```{r create tible2}
+```{r create tible2, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
 trade_2 <- trade %>%
-  filter(is.na(trade_value) == FALSE, year == 2018) %>% 
+  filter(is.na(trade_value) == FALSE, year == 2019) %>% 
   filter(country %in% c("Africa", "Asia", "Australia and Oceania", "Europe", "North America", "South/Central America" ))%>%
-  group_by(year, trade_type, state) %>%
-  summarize(trade_value = mean(trade_value)) %>%
-  pivot_wider(names_from = trade_type, values_from = trade_value) 
-
-trade_2$Net_Import = trade_2$Import-trade_2$Export
+  group_by(country, trade_type) %>%
+  summarize(trade_value = sum(trade_value)) 
+  
 head(trade_2,10)
 ```
-```{r create tible3}
+
+```{r create tible3, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
 trade_3 <- trade %>%
   filter(is.na(trade_value) == FALSE) %>% 
   filter(country %in% c("Africa", "Asia", "Australia and Oceania", "Europe", "North America", "South/Central America" ))%>%
   group_by(year, trade_type, country) %>%
   summarize(trade_value = mean(trade_value)) %>%
   pivot_wider(names_from = trade_type, values_from = trade_value) 
-
+trade_3$year = as.numeric(trade_3$year)
 trade_3$Net_Import = trade_3$Import-trade_3$Export
 head(trade_3,10)
 ```
 
-
-```{r install}
-install.packages("usmap",repos = "http://cran.us.r-project.org")
-library(usmap)
-library(ggplot2)
+```{r create tible4, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
+trade_4 <- trade %>%
+  filter(is.na(trade_value) == FALSE) %>% 
+  filter(country %in% c("Africa", "Asia", "Australia and Oceania", "Europe", "North America", "South/Central America" ))%>%
+  group_by(year, trade_type, country, state) %>%
+  summarize(trade_value = mean(trade_value)) %>%
+  pivot_wider(names_from = trade_type, values_from = trade_value) %>%
+  filter(country == "Asia", year == 2019)
+  
+trade_4$Net_Import = trade_4$Import-trade_4$Export
+head(trade_4,10)
 ```
 
-```{r line graph}
-ggplot(data = trade_1, aes(year)) + 
-  geom_line(aes(y = Export, colour = "blue")) + 
-  geom_line(aes(y = Import, colour = "read"))
+```{r create tible5, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
+trade_5 <- trade %>%
+  filter(is.na(trade_value) == FALSE, year == 2019) %>% 
+  filter(country %in% c("Africa", "Asia", "Australia and Oceania", "Europe", "North America", "South/Central America" ))%>%
+  group_by(state,trade_type) %>%
+  summarize(trade_value = sum(trade_value)) %>%
+  pivot_wider(id = state, names_from = trade_type, values_from = trade_value)
+
+trade_5$Net_Import = trade_5$Import-trade_5$Export
+head(trade_5,10)
 ```
 
-```{r create map}
-plot_usmap(regions = "state", data = trade_2, values = "Export", color = "red") + 
-  scale_fill_continuous(name = "U.S Exports(2019)", label = scales::comma) + 
+```{r line graph, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+ggplot(data = trade_1, aes(year,group = 1)) +
+  geom_line(aes(y = Export/1000000,color = "darkred")) + 
+  geom_line(aes(y = Import/1000000,color ="darkgreen")) +
+  scale_colour_discrete(name  ="Trade Type",labels=c("Export", "Import")) +
+  xlab("Year") +
+  ylab("Average $ Million")+
+  ggtitle("The U.S. Exports versus Imports")
+```
+
+```{r bar graph, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+ggplot(data=trade_2, aes(x= reorder(country, trade_value), y = trade_value/1000000000, fill = trade_type))+
+    geom_bar(stat="identity",width = 0.6) +
+    scale_fill_manual(name = "Trade Type", values= c('darkgreen','darkred') ) +
+    scale_y_continuous(name = "Total $ Billion", breaks = seq(0, 3000, by = 500)) +
+    xlab("Country") +
+    ggtitle("The 2019 U.S.Trade Values by Related Regions")+
+    coord_flip() +
+    theme_minimal()
+```
+
+```{r create area graph, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+ggplot(data=trade_3, aes(x=year, y=Net_Import/1000000,  fill=country)) + 
+    scale_x_discrete(limit = c(2008, 2011, 2015,2019), name = "Year") +
+    ylab("Average $ Million") +
+    scale_fill_discrete(name = "Region") +
+    ggtitle("The U.S. Net Imports by Region and over Time") +
+    geom_area() 
+```
+
+```{r create map, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+#low = "#56B1F7", high = "#132B43" - default
+plot_usmap(regions = "state", data = trade_5, values = "Net_Import", color = "black") + 
+  scale_fill_continuous(low = "white", high = "blue",name = "Total Values", label=number_format(scale=1e-9, suffix = "billion")) + 
+  ggtitle("The 2019 U.S.State Net-Imports") +
   theme(legend.position = "right")
-plot_usmap(regions = "state", data = trade_2, values = "Import", color = "red") + 
-  scale_fill_continuous(name = "U.S Exports(2019)", label = scales::comma) + 
-  theme(legend.position = "right")
 ```
-
-```{r create area graph}
-ggplot(data=trade_3, aes(x=year, y=Export, fill=country)) + 
-    geom_area()
-ggplot(data=trade_3, aes(x=year, y=Import, fill=country)) + 
-    geom_area()
-```
-
-
-
