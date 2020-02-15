@@ -34,76 +34,34 @@ trade$year = as.character(trade$year)
 head(trade,10)
 ```
 
-```{r create tible1, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
+```{r line graph, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
 trade_1 <- trade %>%
   filter(is.na(trade_value) == FALSE) %>% 
   filter(country %in% c("Africa", "Asia", "Australia and Oceania", "Europe", "North America", "South/Central America" ))%>%
   group_by(year, trade_type) %>%
   summarize(trade_value = mean(trade_value)) %>%
   pivot_wider(id_cols = year, names_from = trade_type, values_from = trade_value) 
-
 trade_1$Net_Import = trade_1$Import-trade_1$Export
-head(trade_1,10)
+
+ggplot(data = trade_1, aes(year,group = 1)) +
+  geom_line(aes(y = Export/1000000,color = "darkred")) + 
+  geom_line(aes(y = Import/1000000,color ="darkgreen")) +
+  scale_colour_discrete(name  ="Trade Type",labels=c("Import", "Export")) +
+  xlab("Year") +
+  ylab("Average $ Million")+
+  ggtitle("Graph 1: The U.S. Exports versus Imports") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+# The Graph 1 shows the trend of U.S exports and imports from the year 2008 to the year 2019. It suggests that despite the sharp drop in 2008 and another low point in 2016, both exports and import have been steadily increasing until 2018. The country has experienced a relatively steeper increase quickly after recovering from the financial crisis in 2009, while other increases are relatively stable over time. Regarding the gap between two lines, it can be concluded that the trade deficit has been increasing over time, and the deficit has even increased since the 2016 election. This is definitely relevant to U.S.trade policy, which is always on the propoganda of Trump administration. The patterns of U.S. Exports and Imports, as well as the gap representing trade deficit, do not seem to show that U.S. has gained more surplus from trade since 2016. To note, Trump escalasted tarriffs on imports in 2018 but the pain appears on both exports and imports. 
 ```
 
-```{r create tible2, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
+```{r bar graph, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
 trade_2 <- trade %>%
   filter(is.na(trade_value) == FALSE, year == 2019) %>% 
   filter(country %in% c("Africa", "Asia", "Australia and Oceania", "Europe", "North America", "South/Central America" ))%>%
   group_by(country, trade_type) %>%
   summarize(trade_value = sum(trade_value)) 
-  
-head(trade_2,10)
-```
 
-```{r create tible3, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
-trade_3 <- trade %>%
-  filter(is.na(trade_value) == FALSE) %>% 
-  filter(country %in% c("Africa", "Asia", "Australia and Oceania", "Europe", "North America", "South/Central America" ))%>%
-  group_by(year, trade_type, country) %>%
-  summarize(trade_value = mean(trade_value)) %>%
-  pivot_wider(names_from = trade_type, values_from = trade_value) 
-trade_3$year = as.numeric(trade_3$year)
-trade_3$Net_Import = trade_3$Import-trade_3$Export
-head(trade_3,10)
-```
-
-```{r create tible4, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
-trade_4 <- trade %>%
-  filter(is.na(trade_value) == FALSE) %>% 
-  filter(country %in% c("Africa", "Asia", "Australia and Oceania", "Europe", "North America", "South/Central America" ))%>%
-  group_by(year, trade_type, country, state) %>%
-  summarize(trade_value = mean(trade_value)) %>%
-  pivot_wider(names_from = trade_type, values_from = trade_value) %>%
-  filter(country == "Asia", year == 2019)
-  
-trade_4$Net_Import = trade_4$Import-trade_4$Export
-head(trade_4,10)
-```
-
-```{r create tible5, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
-trade_5 <- trade %>%
-  filter(is.na(trade_value) == FALSE, year == 2019) %>% 
-  filter(country %in% c("Africa", "Asia", "Australia and Oceania", "Europe", "North America", "South/Central America" ))%>%
-  group_by(state,trade_type) %>%
-  summarize(trade_value = sum(trade_value)) %>%
-  pivot_wider(id = state, names_from = trade_type, values_from = trade_value)
-
-trade_5$Net_Import = trade_5$Import-trade_5$Export
-head(trade_5,10)
-```
-
-```{r line graph, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
-ggplot(data = trade_1, aes(year,group = 1)) +
-  geom_line(aes(y = Export/1000000,color = "darkred")) + 
-  geom_line(aes(y = Import/1000000,color ="darkgreen")) +
-  scale_colour_discrete(name  ="Trade Type",labels=c("Export", "Import")) +
-  xlab("Year") +
-  ylab("Average $ Million")+
-  ggtitle("The U.S. Exports versus Imports")
-```
-
-```{r bar graph, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
 ggplot(data=trade_2, aes(x= reorder(country, trade_value), y = trade_value/1000000000, fill = trade_type))+
     geom_bar(stat="identity",width = 0.6) +
     scale_fill_manual(name = "Trade Type", values= c('darkgreen','darkred') ) +
@@ -112,20 +70,39 @@ ggplot(data=trade_2, aes(x= reorder(country, trade_value), y = trade_value/10000
     ggtitle("The 2019 U.S.Trade Values by Related Regions")+
     coord_flip() +
     theme_minimal()
+
+
 ```
 
 ```{r create area graph, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+trade_3 <- trade %>%
+  filter(is.na(trade_value) == FALSE) %>% 
+  filter(country %in% c("Africa", "Asia", "Australia and Oceania", "Europe", "North America", "South/Central America" ))%>%
+  group_by(year, trade_type, country) %>%
+  summarize(trade_value = mean(trade_value)) %>%
+  pivot_wider(names_from = trade_type, values_from = trade_value) 
+trade_3$year = as.numeric(trade_3$year)
+trade_3$Net_Import = trade_3$Import-trade_3$Export
+
 ggplot(data=trade_3, aes(x=year, y=Net_Import/1000000,  fill=country)) + 
     scale_x_discrete(limit = c(2008, 2011, 2015,2019), name = "Year") +
     ylab("Average $ Million") +
     scale_fill_discrete(name = "Region") +
     ggtitle("The U.S. Net Imports by Region and over Time") +
-    geom_area() 
+    geom_area()
 ```
 
 ```{r create map, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+trade_4 <- trade %>%
+  filter(is.na(trade_value) == FALSE, year == 2019) %>% 
+  filter(country %in% c("Africa", "Asia", "Australia and Oceania", "Europe", "North America", "South/Central America" ))%>%
+  group_by(state,trade_type) %>%
+  summarize(trade_value = sum(trade_value)) %>%
+  pivot_wider(id = state, names_from = trade_type, values_from = trade_value)
+trade_4$Net_Import = trade_4$Import-trade_4$Export
+
 #low = "#56B1F7", high = "#132B43" - default
-plot_usmap(regions = "state", data = trade_5, values = "Net_Import", color = "black") + 
+plot_usmap(regions = "state", data = trade_4, values = "Net_Import", color = "black") + 
   scale_fill_continuous(low = "white", high = "blue",name = "Total Values", label=number_format(scale=1e-9, suffix = "billion")) + 
   ggtitle("The 2019 U.S.State Net-Imports") +
   theme(legend.position = "right")
