@@ -78,7 +78,7 @@ ggplot(data=trade_3, aes(x=year, y=Net_Import/1000000,  fill=country)) +
 ```{r bar graph, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
 trade_2 <- trade %>%
   filter(is.na(trade_value) == FALSE, year == 2019) %>% 
-  filter(country %in% c("Africa", "Asia", "Australia and Oceania", "Europe", "North America", "South/Central America" ))%>%
+  filter(country %in% c("China", "Canada", "Mexico", "Brazil", "Germany"))%>%
   group_by(country, trade_type) %>%
   summarize(trade_value = sum(trade_value)) 
 
@@ -87,10 +87,12 @@ ggplot(data=trade_2, aes(x= reorder(country, trade_value), y = trade_value/10000
     scale_fill_manual(name = "Trade Type", values= c('darkgreen','darkred') ) +
     scale_y_continuous(name = "Total $ Billion", breaks = seq(0, 3000, by = 500)) +
     xlab("Country") +
-    ggtitle("The 2019 U.S.Trade Values by Related Regions")+
+    ggtitle("Graph 3: The 2019 U.S.Trade Values by Related Regions")+
+    theme(plot.title = element_text(hjust = 0.5)) +
     coord_flip() +
     theme_minimal()
 
+#The Graph 3 takes a single year of 2019 to look at compare trade patterns with major related countries. Trump has imposed a large amount of tarrifs last year, mainly regarding imports from China, but also from several places including Canada, Germany, Brazil, Mexico. However, the graph shows that China still accounts for its major imports, although the total trade value with China is below NAFTA countries. U.S. is exporting to Canada and Mexico a lot compared to its exports to China, given that NAFTA has allow many U.S.firms to export to Canada and Mexico mainly with higher-skilled goods. But such agreements do not exist with China and Germany.
 
 ```
 
