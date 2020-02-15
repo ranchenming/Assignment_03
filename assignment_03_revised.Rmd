@@ -5,14 +5,6 @@ date: "2/13/2020"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(
-	echo = TRUE,
-	message = FALSE,
-	warning = FALSE
-)
-```
-
 ```{r install-packages, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
 install.packages("usmap",repos = "http://cran.us.r-project.org")
 install.packages("scales", repos = "http://cran.us.r-project.org")
@@ -67,7 +59,7 @@ trade_3$Net_Import = trade_3$Import-trade_3$Export
 ggplot(data=trade_3, aes(x=year, y=Net_Import/1000000,  fill=country)) + 
     scale_x_discrete(limit = c(2008, 2011, 2015,2019), name = "Year") +
     ylab("Average $ Million") +
-    scale_fill_discrete(name = "Region") +
+    scale_fill_discrete(name = "World Region") +
     ggtitle("Graph 2: The U.S. Net Imports by Region and over Time") +
     theme(plot.title = element_text(hjust = 0.5)) +
     geom_area()
@@ -85,29 +77,31 @@ trade_2 <- trade %>%
 ggplot(data=trade_2, aes(x= reorder(country, trade_value), y = trade_value/1000000000, fill = trade_type))+
     geom_bar(stat="identity",width = 0.6) +
     scale_fill_manual(name = "Trade Type", values= c('darkgreen','darkred') ) +
-    scale_y_continuous(name = "Total $ Billion", breaks = seq(0, 3000, by = 500)) +
+    scale_y_continuous(name = "Total $ Billion", breaks = seq(0, 3000, by = 100)) +
     xlab("Country") +
     ggtitle("Graph 3: The 2019 U.S.Trade Values by Related Regions")+
     theme(plot.title = element_text(hjust = 0.5)) +
     coord_flip() +
     theme_minimal()
 
-#The Graph 3 takes a single year of 2019 to look at compare trade patterns with major related countries. Trump has imposed a large amount of tarrifs last year, mainly regarding imports from China, but also from several places including Canada, Germany, Brazil, Mexico. However, the graph shows that China still accounts for its major imports, although the total trade value with China is below NAFTA countries. U.S. is exporting to Canada and Mexico a lot compared to its exports to China, given that NAFTA has allow many U.S.firms to export to Canada and Mexico mainly with higher-skilled goods. But such agreements do not exist with China and Germany.
+#The Graph 3 takes a single year of 2019 to look at compare total trade values with major related countries. Trump has imposed a large amount of tarrifs last year, mainly regarding imports from China, but also from several places including Canada, Germany, Brazil, Mexico. However, the graph shows that China still accounts for its major imports, although the total trade value with China is below NAFTA countries. U.S. is exporting to Canada and Mexico a lot compared to its exports to China, given that NAFTA has allow many U.S.firms to export to Canada and Mexico mainly with higher-skilled goods. But such agreements do not exist with China and Germany.
 
 ```
 
 ```{r create map, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
 trade_4 <- trade %>%
-  filter(is.na(trade_value) == FALSE, year == 2019) %>% 
+  filter(is.na(trade_value) == FALSE, year == c(2019)) %>% 
   filter(country %in% c("Africa", "Asia", "Australia and Oceania", "Europe", "North America", "South/Central America" ))%>%
-  group_by(state,trade_type) %>%
+  group_by(state,trade_type,year) %>%
   summarize(trade_value = sum(trade_value)) %>%
-  pivot_wider(id = state, names_from = trade_type, values_from = trade_value)
+  pivot_wider(names_from = trade_type, values_from = trade_value) 
 trade_4$Net_Import = trade_4$Import-trade_4$Export
 
 #low = "#56B1F7", high = "#132B43" - default
 plot_usmap(regions = "state", data = trade_4, values = "Net_Import", color = "black") + 
-  scale_fill_continuous(low = "white", high = "blue",name = "Total Values", label=number_format(scale=1e-9, suffix = "billion")) + 
+  scale_fill_continuous(low = "white", high = "darkblue", name = "Total Value", label=number_format(scale=1e-9, suffix = "billion"), limits=c(0,300000000000), breaks=seq(0,300000000000, by=50000000000)) + 
   ggtitle("The 2019 U.S.State Net-Imports") +
-  theme(legend.position = "right")
+  theme(legend.position = "right", plot.title = element_text(hjust = 0.5))
+
+#The Graph 4 also takes a single year of 2019 but to look at U.S net imports across all states. Cross-state trade patterns show that a few states are indeed exporting rather than importing goods, while many are still importing slightly more than exporting. The state with highest net imports is California, whose trade deficits significantly surpasses all other states, In contrast, the states marked with grey color export more than its imports. Since the country as a whole has large net imports, this implies that the difference in trade is huge among among different states. Importantly, more liberal states tend to have higher trade deficit, meaning higher net import, which can partly implies party affiliation pattern especially near election term.
 ```
