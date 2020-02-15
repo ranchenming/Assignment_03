@@ -100,7 +100,7 @@ trade_4$Net_Import = trade_4$Import-trade_4$Export
 #low = "#56B1F7", high = "#132B43" - default
 plot_usmap(regions = "state", data = trade_4, values = "Net_Import", color = "black") + 
   scale_fill_continuous(low = "white", high = "darkblue", name = "Total Value", label=number_format(scale=1e-9, suffix = "billion"), limits=c(0,300000000000), breaks=seq(0,300000000000, by=50000000000)) + 
-  ggtitle("The 2019 U.S.State Net-Imports") +
+  ggtitle("Graph4: The 2019 U.S.State Net-Imports") +
   theme(legend.position = "right", plot.title = element_text(hjust = 0.5))
 
 #The Graph 4 also takes a single year of 2019 but to look at U.S net imports across all states. Cross-state trade patterns show that a few states are indeed exporting rather than importing goods, while many are still importing slightly more than exporting. The state with highest net imports is California, whose trade deficits significantly surpasses all other states, In contrast, the states marked with grey color export more than its imports. Since the country as a whole has large net imports, this implies that the difference in trade is huge among among different states. Importantly, more liberal states tend to have higher trade deficit, meaning higher net import, which can partly implies party affiliation pattern especially near election term.
