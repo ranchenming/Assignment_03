@@ -54,6 +54,26 @@ ggplot(data = trade_1, aes(year,group = 1)) +
 
 # The Graph 1 shows the trend of U.S exports and imports from the year 2008 to the year 2019. It suggests that despite the sharp drop in 2008 and another low point in 2016, both exports and import have been steadily increasing until 2018. The country has experienced a relatively steeper increase quickly after recovering from the financial crisis in 2009, while other increases are relatively stable over time. Regarding the gap between two lines, it can be concluded that the trade deficit has been increasing over time, and the deficit has even increased since the 2016 election. This is definitely relevant to U.S.trade policy, which is always on the propoganda of Trump administration. The patterns of U.S. Exports and Imports, as well as the gap representing trade deficit, do not seem to show that U.S. has gained more surplus from trade since 2016. To note, Trump escalasted tarriffs on imports in 2018 but the pain appears on both exports and imports. 
 ```
+```{r create area graph, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+trade_3 <- trade %>%
+  filter(is.na(trade_value) == FALSE) %>% 
+  filter(country %in% c("Africa", "Asia", "Australia and Oceania", "Europe", "North America", "South/Central America" ))%>%
+  group_by(year, trade_type, country) %>%
+  summarize(trade_value = mean(trade_value)) %>%
+  pivot_wider(names_from = trade_type, values_from = trade_value) 
+trade_3$year = as.numeric(trade_3$year)
+trade_3$Net_Import = trade_3$Import-trade_3$Export
+
+ggplot(data=trade_3, aes(x=year, y=Net_Import/1000000,  fill=country)) + 
+    scale_x_discrete(limit = c(2008, 2011, 2015,2019), name = "Year") +
+    ylab("Average $ Million") +
+    scale_fill_discrete(name = "Region") +
+    ggtitle("Graph 2: The U.S. Net Imports by Region and over Time") +
+    theme(plot.title = element_text(hjust = 0.5)) +
+    geom_area()
+
+# The Graph 2 further breaks down the trend of U.S trade deficit represented by net imports from the year 2008 to the year 2019. Taking into account 6 world regions as export destinations and import origins, the graph shows that the major deficits occurs from U.S. trade activities with Asian countries, secondly with Europe, Thirdly with North America. However, for its trade activities with Africa, Australia and South/Central America, there are rather trade surplus. This sort of explains Trump interests in Asian Pacific, specifically China as the major trade policy target. But this seems do not provide rationales for imposing tarriffs on goods from Brazil and Mexico in the year 2019 and for calling questions on NAFTA.
+```
 
 ```{r bar graph, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
 trade_2 <- trade %>%
@@ -72,24 +92,6 @@ ggplot(data=trade_2, aes(x= reorder(country, trade_value), y = trade_value/10000
     theme_minimal()
 
 
-```
-
-```{r create area graph, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
-trade_3 <- trade %>%
-  filter(is.na(trade_value) == FALSE) %>% 
-  filter(country %in% c("Africa", "Asia", "Australia and Oceania", "Europe", "North America", "South/Central America" ))%>%
-  group_by(year, trade_type, country) %>%
-  summarize(trade_value = mean(trade_value)) %>%
-  pivot_wider(names_from = trade_type, values_from = trade_value) 
-trade_3$year = as.numeric(trade_3$year)
-trade_3$Net_Import = trade_3$Import-trade_3$Export
-
-ggplot(data=trade_3, aes(x=year, y=Net_Import/1000000,  fill=country)) + 
-    scale_x_discrete(limit = c(2008, 2011, 2015,2019), name = "Year") +
-    ylab("Average $ Million") +
-    scale_fill_discrete(name = "Region") +
-    ggtitle("The U.S. Net Imports by Region and over Time") +
-    geom_area()
 ```
 
 ```{r create map, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
